@@ -1,0 +1,118 @@
+# FILE: ci_simple_basic.yml
+# DATE (created): Oct 17, 2022
+# PURPOSE: 
+#  This GitAction workflow will run the required service Docker containers (via Docker Compose) & perform basic healthchecks. 
+
+name: CI-SIMPLE-Basic
+
+on:
+  push:
+    #branches: [ "main" ]
+    #branches: [ "main", "develop" ]
+    branches-ignore: [main]
+    #branches-ignore: [develop]
+
+  pull_request:
+    branches: [ "main", "develop" ]
+    #branches: [ "main" ]
+
+  # SR-ADD: Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Create custom CI/CD variables.
+# Define custom workflow environment constants (ie. secrets etc.)
+env:
+  # TODO: Remember to update version on new tag
+  LATEST_TAG: 1.0.0
+  DOCKER_DC_YAML_FILEPATH: ./simple/docker-compose.yml
+
+  DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
+  DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
+
+jobs:
+
+  # JOB-01.
+  # PURPOSE: Build & Run Docker Compose Linux containers.
+  # USE-CASE: Useful as a 'smoke' test to ensure that the created containers are active & functioning as expected.
+  job-build-01:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Job shell message (start).
+      - name: MESSAGE (Pre).
+        run: echo "Git Action Workflow - JOB 01 -  START..."
+
+      # Runs a single command using the runners shell - 01.
+      - name: Show Docker version installed on the runner.
+        run: docker --version
+
+      # Runs a single command using the runners shell - 02.
+      - name: Show Docker Compose version installed on the runner.
+        run: docker-compose --version
+
+      # DOCKER: Show active containers (pre).
+      - name: DOCKER - Show active containers.
+        run: docker ps -a
+
+      # Build & Run the Docker container/services defined in the YAML file.
+      - name: Build & Run Docker containers.
+        run: docker-compose -f $DOCKER_DC_YAML_FILEPATH up -d
+        #run: docker-compose -f $DOCKER_DC_YAML_FILEPATH up --build -d --remove-orphans
+
+      # DOCKER: Show active containers (post).
+      - name: DOCKER - Show active containers.
+        run: docker ps -a
+
+      # CONTAINER-Django: Default working directory path.
+      - name: PROJECT-DJ-Simple (1/6) - Show default working directory path.
+        run: docker exec $DOCKER_CONTAINER_DJ_NAME pwd
+
+      # CONTAINER-Django: List all files & folder in the default working directory.
+      - name: PROJECT-DJ-Simple (2/6) - Show files & folders in the default directory.
+        run: docker exec $DOCKER_CONTAINER_DJ_NAME ls -lah
+
+      # CONTAINER-Django: Perform healthcheck - Test Django default app endpoint.
+      - name: PROJECT-DJ-Simple (3/6) - Perform healthcheck.
+        run: | 
+          echo "CHECK-ENDPOINT: http://localhost:8000/home/"
+          docker run --network container:$DOCKER_CONTAINER_DJ_NAME appropriate/curl --retry 10 --retry-connrefused http://localhost:8000/home/
+
+      # CONTAINER-Django: Test - Run test cases.
+      - name: PROJECT-DJ-Simple (4/6) - Run Test Cases.
+        #working-directory: ./simple/django/myproject/
+        # Define custom task variables.
+        run: | 
+          echo "TEST: Run Test Cases"
+          docker exec $DOCKER_CONTAINER_DJ_NAME pwd
+          docker exec $DOCKER_CONTAINER_DJ_NAME ls -lah
+          docker exec -w /project/django/myproject djdc_web_aa python manage.py test -v 2 myapp.tests
+
+      # CONTAINER-Django: Test - Run test cases using multiple shell commands (METHOD - Alternative).
+      # NOTE: This step is an alternative equivalent to previous step (ie step 4/6). 
+      - name: PROJECT-DJ-Simple (5/6) - Run Test Cases (METHOD - Alternative).
+        # Define custom task specific variables. 
+        env:
+          CMD_01: "cd myproject"
+          CMD_02: "ls -lah"
+          CMD_03: "python manage.py test -v 2 myapp.tests"
+        run: | 
+          echo "TEST: Run Test Cases"
+          docker exec $DOCKER_CONTAINER_DJ_NAME ls -lah
+          echo "ALTERNATIVELY (using multiple shell commands):"
+          echo "***** ALT-01: *****"
+          docker exec djdc_web_aa bash -c "cd myproject; ls -lah; python manage.py test -v 2 myapp.tests"
+          echo "***** ALT-02: *****"
+          docker exec djdc_web_aa bash -c "$CMD_01; $CMD_02; $CMD_03"
+
+      # Stop the Docker container/services defined in the YAML file.
+      - name: Stop Docker containers.
+        run: docker-compose -f $DOCKER_DC_YAML_FILEPATH down
+
+      # Job shell message (end).
+      - name: MESSAGE (Post).
+        run: echo "Git Action Workflow - JOB 01 - DONE."
