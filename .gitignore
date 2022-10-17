@@ -1,3 +1,40 @@
+# Django gitignore #
+
+# NOTE-01: Comments.
+#* Lines starting with a hash mark (#) are comments and are ignored. 
+#* Empty lines can be used to improve the readability of the file and to group related lines of patterns.
+
+# NOTE-02: Slash.
+#* The slash symbol (/) represents a directory separator. 
+#** The slash at the beginning of a pattern is relative to the directory where the .gitignore resides.
+#** If the pattern starts with a slash, it matches files and directories only in the repository root.
+#** If the pattern doesn’t start with a slash, it matches files and directories in any directory or subdirectory.
+#** If the pattern ends with a slash, it matches only directories. 
+#*** When a directory is ignored, all of its files and subdirectories are also ignored.
+
+# NOTE-03: Using (**).
+# In case you need to exclude sub folders you can use the ** wildcard to exclude any level of sub directory.
+
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
+
+
+# Subdirectories to ignore. #
+# data/
+# data/db/
+**/data/db/
+**/temp
+
+# Backup files # 
+*.bak 
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

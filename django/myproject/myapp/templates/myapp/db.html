@@ -1,0 +1,38 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}<title>DB</title>{% endblock title %}
+
+{% block content %}
+
+  <body>
+    <h1>--- Database ---</h1>
+    <h3> TABLE - "myapp_person" </h3>
+
+    <ul>
+      {% for p in persons %}
+      <li>{{ p.id }}: {{ p.first_name }} {{ p.last_name }}</li>
+      {% endfor %}
+    </ul>
+
+    <table class="my_table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in persons %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ p.first_name }}</td>
+          <td>{{ p.last_name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </body>
+
+{% endblock content %}

@@ -1,0 +1,36 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}<title>Thanks</title>{% endblock title %}
+
+<!-- Load Favicon. -->
+{% block head_favicon %}
+  {% load static %}
+  <!-- COMMENT-Override: Load global favicon. -->
+  <link rel="icon" type="image/png"
+    href="{% static 'favicon/favicon-red-32x32.png' %}">
+{% endblock head_favicon %}
+
+<!-- CSS. -->
+{% block head_css %}
+    <!-- Load CSS files.  -->
+    {% block head_css_file %}
+      {% load static %}
+      <link rel="stylesheet" type="text/css"
+            href="{% static 'myapp/css/style.css' %}">
+      <!-- COMMENT-Override: Load global CSS file. -->
+      <link rel="stylesheet" type="text/css"
+            href="{% static 'css/style_global.css' %}">
+    {% endblock head_css_file %}
+{% endblock head_css %}
+
+
+{% block content %}
+  <h1>--- THANK YOU! ---</h1>
+
+  <a href="/form/"> Back to form page. (method-01)</a>
+
+  <br>
+  <br>
+
+  <a href="{% url 'form' %}"> Back to form page. (method-02)</a>
+{% endblock content %}

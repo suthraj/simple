@@ -1,0 +1,120 @@
+{# COMMENT(Django): Does not show up when page is loaded unlike html commenting tag) #}
+{# COMMENT(Django): Use the following method (using Django tag) for multiline comments. #}
+{% comment %}
+  --- Place multiline comments here ---
+  favicon.io - Favicon Generators.
+  https://favicon.io/
+  https://favicon.io/favicon-generator/
+{% endcomment %}
+
+{# COMMENT(Django): HTML5 declaration #}
+<!DOCTYPE html>
+
+<html>
+
+  {# Make modifiable head elements using Django 'block' #}
+  <head>
+    {% block title %}<title>MY APP</title>{% endblock title%}
+    <!-- Custom CSS file. -->
+    <!-- No use of Bootstrap. -->
+
+    <!-- Load Favicon. -->
+    {% block head_favicon %}
+      {% load static %}
+      <!-- COMMENT-Override: Load favicon from local 'favicon' folder. -->
+      <link rel="icon" type="image/png"
+        href="{% static 'myapp/favicon/favicon-blue-32x32.png' %}">
+      <!-- COMMENT-Override: Load global favicon. -->
+      {# Defined in the project 'settings.py' file by the variable 'STATICFILES_DIRS' #}
+      <!--
+      <link rel="icon" type="image/png"
+        href="{% static 'favicon/favicon-red-32x32.png' %}">
+      -->
+    {% endblock head_favicon %}
+
+    <!-- META. -->
+    {% block head_meta %}
+
+      <!-- Meta data. -->
+      {% block head_meta_basic %}
+        <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Language" value="en-US" />
+      {% endblock head_meta_basic %}
+
+      <!-- Meta - Viewport. -->
+      {% block head_meta_viewport %}
+          <meta name="viewport"
+                content="width=device-width, initial-scale=1.0">
+      {% endblock head_meta_viewport %}
+    {% endblock head_meta %}
+
+    <!-- CSS. -->
+    {% block head_css %}
+
+        <!-- Load CSS files.  -->
+        {% block head_css_file %}
+          {% load static %}
+          <link rel="stylesheet" type="text/css"
+                href="{% static 'myapp/css/style.css' %}">
+          <!-- COMMENT: Load global CSS file.
+          <link rel="stylesheet" type="text/css"
+                href="{% static 'css/style_global.css' %}">
+          -->
+          <!-- COMMENT-ALTERNATE-METHOD: Load file location by passing project constant 'STATIC_URL'.
+          <link rel="stylesheet" media="screen"
+                href="{{ STATIC_URL }}css/bootstrap.min.css">
+          <link href="{{ STATIC_URL }}css/app.css"
+                rel="stylesheet" media="screen">
+          -->
+        {% endblock head_css_file %}
+
+        <!-- CSS code (explicit). -->
+        {% block head_css_section %}
+          <!-- Insert CSS code here.-->
+        {% endblock head_css_section %}
+    {% endblock head_css %}
+  </head>
+
+  {# Make modifiable body elements using Django 'block' #}
+  <body>
+    <!-- Navigation bar. -->
+    {% block navbar %}
+      <div class="topnav">
+       <a class="active" href="{% url 'home' %}">Home</a>
+       <a href="{% url 'db' %}">DB</a>
+       <a href="{% url 'form' %}">Form</a>
+       <a href="{% url 'thanks' %}">Thanks</a>
+       <a href="{% url 'ip' %}">IP</a>
+       <a href="{% url 'test-simple' %}">Test Simple</a>
+       <a href="{% url 'test-page' %}">Test Page</a>
+     </div>
+    {% endblock navbar%}
+
+    <!-- Body content. -->
+    {# COMMENT(Django template comment method) - The Document Body #}
+    {% block content %}
+      <!-- default content text (typically empty) -->
+    {% endblock content%}
+    <p> {{ STATIC_URL }} </p>
+
+  </body>
+
+    <!-- Footer. -->
+    <!-- Javascript (JS). -->
+    {# COMMENT(Django): Set of blocks to organize and add JavaScript (JS). #}
+    {% block footer_javascript %}
+
+      <!-- Insert JS files. -->
+      {% block footer_js_site %}
+        <!-- Load JS libraries here.-->
+      {% endblock footer_js_site %}
+
+      <!-- Insert JS code (explicit). -->
+      {% block footer_js_section %}
+        <!-- Insert JS code here.-->
+      {% endblock footer_js_section %}
+
+    {% endblock footer_javascript %}
+
+</html>

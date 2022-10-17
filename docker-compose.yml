@@ -1,0 +1,31 @@
+version: "3.7"
+   
+services:
+  db:
+    container_name: djdc_db_pgv13_aa
+    image: postgres:13.5-bullseye
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      #* Running properly (aka "healthy") if exit 0 returned.
+      test: "exit 0" 
+
+  web:
+    container_name: djdc_web_aa
+    build: .
+    command: python myproject/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./django:/project/django
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db
+

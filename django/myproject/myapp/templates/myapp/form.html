@@ -1,0 +1,55 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}<title>Example Forms Page</title>{% endblock title %}
+
+{% block content %}
+
+  <h1>--- Forms Page (experiment) --- </h1>
+
+  <h3> FORM - Render the form by letting Django unpack automatically</h3>
+  <form action="/form/test/submit_name" method="post">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" value="Submit">
+  </form>
+
+  <h3> FORM - Render the form wrapped in "&lt;p&gt;" tags.</h3>
+  <form action="/form/test/submit_name" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="Submit">
+  </form>
+
+  <h3> FORM - Render the form as table cells wrapped in "&lt;tr&gt;" tags. </h3>
+  <form action="/form/test/submit_name" method="post">
+      {% csrf_token %}
+      <table>
+      {{ form.as_table }}
+      </table>
+      <input type="submit" value="Submit">
+  </form>
+
+  <h3> FORM - Render the form wrapped in "&lt;li&gt;" tags. </h3>
+  <form action="/form/test/submit_name" method="post">
+      {% csrf_token %}
+      <ul>
+      {{ form.as_ul }}
+      </ul>
+      <input type="submit" value="Submit">
+  </form>
+
+  <h3> FORM - Render form fields manually using explicit html tags. </h3>
+  <form action="/form/test/submit_name" method="post">
+      {% csrf_token %}
+      <p>
+        <label for="id_first_name">First name:</label>
+        <input type="text" name="first_name" maxlength="100" required="" id="id_first_name">
+      </p>
+      <p>
+        <label for="id_last_name">Last name:</label>
+        <input type="text" name="last_name" maxlength="100" required="" id="id_last_name">
+      </p>
+      <input type="submit" value="Submit">
+  </form>
+
+{% endblock content %}

@@ -1,0 +1,54 @@
+{# OPTION-BASE-01: Use the "local" (or "App-Level") 'templates' folder base html file. #}
+{% extends "myapp/base.html" %}
+
+{# OPTION-BASE-02: To instead use the "global" (or "Project-Level") 'templates' folder base html file, uncomment and use the following line. #}
+{# {% extends "base_global.html" %} #}
+
+{% block title %}<title>MY APP</title>{% endblock title %}
+
+{% block content %}
+  <h1>--- Home Page ---</h1>
+
+  <div>
+    <h5> FORM - Render (manually) form fields using explicit html tags. </h5>
+    <form action="/form/submit-name/" method="post">
+        {% csrf_token %}
+        <p>
+          <label for="id_first_name">First name:</label>
+          <input type="text" name="first_name" maxlength="100" required="" id="id_first_name">
+        </p>
+        <p>
+          <label for="id_last_name">Last name:</label>
+          <input type="text" name="last_name" maxlength="100" required="" id="id_last_name">
+        </p>
+        <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <br>
+  <hr>
+
+  <div>
+    <h5> FORM - Render (automatically) form fields. </h5>
+    <form action="/form/submit-shirt/" method = "POST">
+        {% csrf_token %}
+        {{ form_shirt }}
+        <input type = "submit" value = "Submit">
+    </form>
+  </div>
+
+  <br>
+  <hr>
+
+  <div>
+    <h5> FORM - Render (automatically as table) form fields. </h5>
+    <form action="/form/submit-expense/" method = "POST">
+        {% csrf_token %}
+        <table>
+          {{ form_expense.as_table }}
+        </table>
+        <input type = "submit" value = "Submit">
+    </form>
+  </div>
+
+{% endblock content%}
