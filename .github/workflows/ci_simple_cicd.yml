@@ -119,7 +119,20 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      
+
+      - name: SSH - Check Docker container info/status (pre)
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+        run: |
+          echo "Connect to remote host - Staging."
+          ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
+          echo "Show all existing containers"
+          sudo docker ps -a
+
+          
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Development
         uses: easingthemes/ssh-deploy@main
