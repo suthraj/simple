@@ -128,7 +128,7 @@ jobs:
           TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
         run: |
           echo "Start the ssh-agent in the background."
-          ssh-agent -s
+          ssh-agent -c
           echo "Add the key."
           ssh-add - <<< "${SSH_PRIVATE_KEY}"
           echo "Connect to remote host - Staging."
