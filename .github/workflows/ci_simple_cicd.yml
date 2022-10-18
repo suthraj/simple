@@ -93,6 +93,7 @@ jobs:
       - name: Deploy
         run: echo "Performing deployment - DEVELOPMENT - START..." 
 
+
       - name: Deploy
         run: echo "Performing deployment - DEVELOPMENT - DONE." 
 
@@ -115,6 +116,19 @@ jobs:
     steps:
       - name: Deploy
         run: echo "Performing deployment - STAGING - START..." 
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
+      # Deploy code with rsync over SSH.
+      - name: Deploy to Server 01 - Development
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+
 
       - name: Deploy
         run: echo "Performing deployment - STAGING - DONE." 
