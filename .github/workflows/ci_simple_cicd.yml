@@ -23,7 +23,7 @@ on:
 env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
-  DOCKER_DC_YAML_FILEPATH: ./simple/docker-compose.yml
+  DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
 
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
@@ -102,7 +102,7 @@ jobs:
   # USE-CASE: Push source code updates.  
   DeployToStaging:
     name: Deploy to the 'staging' environemnt.
-    # Condition true only for branch commits & merges.
+    # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
     # The type of runner that the job will run on
