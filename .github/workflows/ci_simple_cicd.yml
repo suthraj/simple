@@ -128,7 +128,9 @@ jobs:
           TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
         run: |
           echo "Connect to remote host - Staging."
-          ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
+          ssh-add - <<< "${SSH_PRIVATE_KEY}"
+          ssh $REMOTE_USER@$REMOTE_HOST
+          #ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
           echo "Show all existing containers"
           sudo docker ps -a
 
