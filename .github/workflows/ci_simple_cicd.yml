@@ -166,7 +166,9 @@ jobs:
 
       # Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
-        run: ssh staging 'sudo docker-compose -f {{$REMOTE_DOCKER_DC_YAML_FILEPATH}} up -d'
+        run: |
+          echo '$REMOTE_DOCKER_DC_YAML_FILEPATH'
+          ssh staging 'sudo docker-compose -f {{$REMOTE_DOCKER_DC_YAML_FILEPATH}} up -d'
 
       # Show remote machine docker container info.
       - name: SSH - Check Docker container info/status (post)
