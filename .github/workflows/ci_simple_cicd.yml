@@ -135,12 +135,13 @@ jobs:
           echo "Create key file."
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
           chmod 600 ~/.ssh/key_staging
+          ls -lah ~/.ssh/
           
           echo "Add the key."
           ssh-add ~/.ssh/key_staging
           #ssh-add - <<< "${SSH_PRIVATE_KEY}"
-
-          ssh-add <(echo "$SSH_PRIVATE_KEY")
+          #ssh-add <(echo "$SSH_PRIVATE_KEY")
+          
           echo "Connect to remote host - Staging."
           ssh $REMOTE_USER@$REMOTE_HOST
           #ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
