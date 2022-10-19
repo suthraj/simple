@@ -186,6 +186,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
           chmod 600 ~/.ssh/key_staging
           ls -lah ~/.ssh/
+          cat ~/.ssh/key_staging
 
           # METHOD-01(TO-DO: NOT WORKING!!!): Using SSH private key.
           echo "Connect to remote host - Staging."

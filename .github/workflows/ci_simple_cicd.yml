@@ -144,6 +144,7 @@ jobs:
             StrictHostKeyChecking no
           END
           ls -lah ~/.ssh/
+          cat ~/.ssh/key_staging
 
           echo "Connect to remote host - Staging."
           #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
