@@ -148,6 +148,14 @@ jobs:
           cat ~/.ssh/key_staging
 
       # Show remote machine docker container info.
+      - name: SSH - Verify remote server Docker info.
+        run: |
+          echo "REMOTE: Show Docker engine version."
+          ssh staging 'sudo docker --version'
+          echo "REMOTE: Show Docker Compose version."
+          ssh staging 'sudo docker-compose --version'
+
+      # Show remote machine docker container info.
       - name: SSH - Check Docker container info/status (pre)
         run: |
           echo "REMOTE: List files & folders"
