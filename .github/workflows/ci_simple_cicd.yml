@@ -186,8 +186,8 @@ jobs:
           echo "REMOTE: Show all existing containers"
           ssh staging 'sudo docker ps -a'
 
-      # Stop the Docker container/services defined in the YAML file.
-      - name: Stop Docker containers.
+      # Stop & remove the Docker container/services defined in the YAML file.
+      - name: SSH - Cleanup - Stop & remove Docker containers.
         run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} down'
 
       - name: MESSAGE (End)
@@ -210,8 +210,8 @@ jobs:
       #url: 'http://www.myapp.com'
     timeout-minutes: 10
     steps:
-      - name: Deploy
+      - name: MESSAGE (Start)
         run: echo "Performing deployment - PRODUCTION - START..." 
 
-      - name: Deploy
+      - name: MESSAGE (End)
         run: echo "Performing deployment - PRODUCTION - DONE." 
