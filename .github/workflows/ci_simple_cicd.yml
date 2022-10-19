@@ -120,7 +120,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: SSH - Check Docker container info/status (pre)
+      - name: SSH - Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
           REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
@@ -146,22 +146,13 @@ jobs:
           ls -lah ~/.ssh/
           cat ~/.ssh/key_staging
 
-          echo "Connect to remote host - Staging."
-          #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
-          ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
-          echo "Show all existing containers"
-          sudo docker ps -a
-
-
-#      - name: Execute commands on remote server.
-#        run: |
-#          ssh staging 'sudo ls -lah'
-#          #echo "Connect to remote host - Staging."
-#          #ssh $REMOTE_USER@$REMOTE_HOST
-#          #ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
-#          echo "Show all existing containers"
-#          sudo docker ps -a
-
+      # Show remote machine docker container info.
+      - name: SSH - Check Docker container info/status (pre)
+        run: |
+          echo "REMOTE: List files & folders"
+          ssh staging 'sudo ls -lah'
+          echo "REMOTE: Show all existing containers"
+          ssh staging 'sudo docker ps -a'
           
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Development
@@ -172,6 +163,13 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
           TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
 
+      # Show remote machine docker container info.
+      - name: SSH - Check Docker container info/status (post)
+        run: |
+          echo "REMOTE: List files & folders"
+          ssh staging 'sudo ls -lah'
+          echo "REMOTE: Show all existing containers"
+          ssh staging 'sudo docker ps -a'
 
       - name: Deploy
         run: echo "Performing deployment - STAGING - DONE." 

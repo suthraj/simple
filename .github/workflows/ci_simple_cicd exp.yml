@@ -189,6 +189,7 @@ jobs:
           cat ~/.ssh/key_staging
 
           # METHOD-01(TO-DO: NOT WORKING!!!): Using SSH private key.
+          # COMMENTS: Looks like this method won't work because data in env variable is encrypted.   
           echo "Connect to remote host - Staging."
           #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
           ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
