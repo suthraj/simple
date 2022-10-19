@@ -26,8 +26,8 @@ env:
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
-
   REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
+  TIMED_DELAY: 5
 
 jobs:
 
@@ -177,6 +177,13 @@ jobs:
         run: |
           echo '${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }}'
           ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} up -d'
+
+      # Timed delayed for database to spin up.
+      - name: Timed delay (DB spin up)
+        run: |
+          # Wait for database to be ready (IMPORTANT: Required for DB to spin up).
+          echo "Wait for database to be ready (${{ env.TIMED_DELAY }}s)..."
+          sleep $TIMED_DELAY
 
       # Show remote machine docker container info.
       - name: SSH - Check Docker container info/status (post)
