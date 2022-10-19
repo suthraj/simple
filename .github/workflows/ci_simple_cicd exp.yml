@@ -25,9 +25,10 @@ env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
-
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
+
+  REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
 
 jobs:
 
@@ -142,6 +143,28 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
           TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
 
+      # Build & Run the Docker container/services defined in the YAML file.
+      - name: Build & Run Docker containers.
+        run: |
+          echo $REMOTE_DOCKER_DC_YAML_FILEPATH
+          echo '${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }}'
+          echo '$REMOTE_DOCKER_DC_YAML_FILEPATH'
+          echo '{$REMOTE_DOCKER_DC_YAML_FILEPATH}'
+          echo '${REMOTE_DOCKER_DC_YAML_FILEPATH}'
+          ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} up -d'
+          #ssh staging 'sudo docker-compose -f $REMOTE_DOCKER_DC_YAML_FILEPATH up -d'
+
+      # Show remote machine docker container info.
+      - name: SSH - Check Docker container info/status (post)
+        run: |
+          echo "REMOTE: List files & folders"
+          ssh staging 'sudo ls -lah'
+          echo "REMOTE: Show all existing containers"
+          ssh staging 'sudo docker ps -a'
+
+      # Stop the Docker container/services defined in the YAML file.
+      - name: Stop Docker containers.
+        run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} down'
 
       - name: Deploy
         run: echo "Performing deployment - STAGING - DONE." 
