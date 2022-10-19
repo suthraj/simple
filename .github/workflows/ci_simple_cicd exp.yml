@@ -7,10 +7,11 @@ name: CI-SIMPLE-CI-CD
 
 on:
   push:
-    #branches: [ "master" ]
+    branches: [ "test" ]
     #branches-ignore: ["master"]
 
   pull_request:
+    branches: [ "test" ]
     #branches: [ "master", "develop" ]
     #branches-ignore: ["master"]
 
@@ -76,32 +77,81 @@ jobs:
 
 
   # JOB-02.
-  # PURPOSE: Deploy repo. to the following environment: development
+  # PURPOSE: Deploy repo. to the following environment: 'staging'
   # USE-CASE: Push source code updates.  
-  DeployToDev:
-    name: Deploy to the 'development' environemnt.
-    if: github.event_name == 'pull_request'
+  DeployToStaging:
+    name: Deploy to the 'staging' environemnt.
+    # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
+    if: github.event.ref == 'refs/heads/master'
     needs: [Build]
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment:
       # Name must be identical (ie. case-sensitive).
-      name: development
-      #url: 'http://dev.myapp.com'
+      name: staging
+      #url: 'http://test.myapp.com'
     timeout-minutes: 10
     steps:
       - name: Deploy
-        run: echo "Performing deployment - DEVELOPMENT - START..." 
+        run: echo "Performing deployment - STAGING - START..." 
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+        run: |
+          echo "Start the ssh-agent in the background."
+          ssh-agent -c
+          echo "Create SSH directory."
+          mkdir -p ~/.ssh/
+          ls -lah ~/.ssh/
+          echo "Create key file."
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
+          chmod 600 ~/.ssh/key_staging
+          ls -lah ~/.ssh/
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $REMOTE_HOST
+            User $REMOTE_USER
+            IdentityFile ~/.ssh/key_staging
+            StrictHostKeyChecking no
+          END
+          ls -lah ~/.ssh/
+
+      - name: Execute commands on remote server.
+        run: |
+          ssh staging 'sudo ls -lah'
+          #echo "Connect to remote host - Staging."
+          #ssh $REMOTE_USER@$REMOTE_HOST
+          #ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
+          echo "Show all existing containers"
+          sudo docker ps -a
+
+          
+      # Deploy code with rsync over SSH.
+      - name: Deploy to Server 01 - Development
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
 
 
       - name: Deploy
-        run: echo "Performing deployment - DEVELOPMENT - DONE." 
+        run: echo "Performing deployment - STAGING - DONE." 
 
 
-  # JOB-03.
+  # TO-DO: Not working!!! (Oct 18, 2022)
+  # JOB-SSH-Test01.
   # PURPOSE: Deploy repo. to the following environment: 'staging'
   # USE-CASE: Push source code updates.  
-  DeployToStaging:
+  DeployToStaging_Test01:
     name: Deploy to the 'staging' environemnt.
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
@@ -136,30 +186,23 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
           chmod 600 ~/.ssh/key_staging
           ls -lah ~/.ssh/
-          cat >>~/.ssh/config <<END
-          Host staging
-            HostName $REMOTE_HOST
-            User $REMOTE_USER
-            IdentityFile ~/.ssh/key_staging
-            StrictHostKeyChecking no
-          END
-          ls -lah ~/.ssh/
 
+          # METHOD-01: Using SSH private key. 
           echo "Connect to remote host - Staging."
           #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
-          ssh ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
+          ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
           echo "Show all existing containers"
           sudo docker ps -a
 
-
-#      - name: Execute commands on remote server.
-#        run: |
-#          ssh staging 'sudo ls -lah'
-#          #echo "Connect to remote host - Staging."
-#          #ssh $REMOTE_USER@$REMOTE_HOST
-#          #ssh -i $SSH_PRIVATE_KEY $REMOTE_USER@$REMOTE_HOST
-#          echo "Show all existing containers"
-#          sudo docker ps -a
+          # METHOD-02: By extracting SSH private key value directly from 'secrets' env variable (ie. without using explicit private key file).
+          echo "Add the key."
+          #ssh-add ~/.ssh/key_staging
+          #ssh-add - <<< "${SSH_PRIVATE_KEY}"
+          #ssh-add <(echo "$SSH_PRIVATE_KEY")
+          echo "Connect to remote host - Staging."
+          ssh $REMOTE_USER@$REMOTE_HOST
+          echo "Show all existing containers"
+          sudo docker ps -a
 
           
       # Deploy code with rsync over SSH.
@@ -174,26 +217,3 @@ jobs:
 
       - name: Deploy
         run: echo "Performing deployment - STAGING - DONE." 
-
-
-  # JOB-04.
-  # PURPOSE: Deploy repo. to the following environment: 'production'
-  # USE-CASE: Push source code updates.
-  # NOTE: If the environment has been conigured to require approval, then manual approval is required (ie. continouse delivery).
-  # Otherwise (ie. approval is disabled) then auto deployment (ie. continouse deployment) to production envrionment will occur.
-  DeployToProduction:
-    name: Deploy to the 'production' environemnt.
-    needs: [DeployToStaging]
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    environment:
-      # Name must be identical (ie. case-sensitive).
-      name: production
-      #url: 'http://www.myapp.com'
-    timeout-minutes: 10
-    steps:
-      - name: Deploy
-        run: echo "Performing deployment - PRODUCTION - START..." 
-
-      - name: Deploy
-        run: echo "Performing deployment - PRODUCTION - DONE." 
