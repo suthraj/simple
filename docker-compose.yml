@@ -1,4 +1,6 @@
-version: "3.7"
+version: "3"
+#version: "3.7"
+
    
 services:
   db:
@@ -10,9 +12,9 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    healthcheck:
+#    healthcheck:
       #* Running properly (aka "healthy") if exit 0 returned.
-      test: "exit 0" 
+#      test: "exit 0" 
 
   web:
     container_name: djdc_web_aa
