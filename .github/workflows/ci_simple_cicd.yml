@@ -129,8 +129,17 @@ jobs:
         run: |
           echo "Start the ssh-agent in the background."
           ssh-agent -c
+          echo "Create SSH directory."
+          mkdir -p ~/.ssh/
+          ls -lah ~/.ssh/
+          echo "Create key file."
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
+          chmod 600 ~/.ssh/key_staging
+          
           echo "Add the key."
+          ssh-add ~/.ssh/key_staging
           #ssh-add - <<< "${SSH_PRIVATE_KEY}"
+
           ssh-add <(echo "$SSH_PRIVATE_KEY")
           echo "Connect to remote host - Staging."
           ssh $REMOTE_USER@$REMOTE_HOST
