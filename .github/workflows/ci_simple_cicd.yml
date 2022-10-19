@@ -115,7 +115,7 @@ jobs:
       #url: 'http://test.myapp.com'
     timeout-minutes: 10
     steps:
-      - name: Deploy
+      - name: MESSAGE (Start)
         run: echo "Performing deployment - STAGING - START..." 
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -190,7 +190,7 @@ jobs:
       - name: Stop Docker containers.
         run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} down'
 
-      - name: Deploy
+      - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
 
 
