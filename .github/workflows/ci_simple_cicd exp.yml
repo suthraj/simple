@@ -187,14 +187,14 @@ jobs:
           chmod 600 ~/.ssh/key_staging
           ls -lah ~/.ssh/
 
-          # METHOD-01: Using SSH private key. 
+          # METHOD-01(TO-DO: NOT WORKING!!!): Using SSH private key.
           echo "Connect to remote host - Staging."
           #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
           ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
           echo "Show all existing containers"
           sudo docker ps -a
 
-          # METHOD-02: By extracting SSH private key value directly from 'secrets' env variable (ie. without using explicit private key file).
+          # METHOD-02(TO-DO: NOT WORKING!!!): By extracting SSH private key value directly from 'secrets' env variable (ie. without using explicit private key file).
           echo "Add the key."
           #ssh-add ~/.ssh/key_staging
           #ssh-add - <<< "${SSH_PRIVATE_KEY}"

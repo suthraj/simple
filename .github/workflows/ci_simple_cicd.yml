@@ -147,7 +147,7 @@ jobs:
 
           echo "Connect to remote host - Staging."
           #ssh -tt -i ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
-          ssh ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
+          ssh -tti ~/.ssh/key_staging $REMOTE_USER@$REMOTE_HOST
           echo "Show all existing containers"
           sudo docker ps -a
 
