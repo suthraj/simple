@@ -168,6 +168,7 @@ jobs:
       - name: Build & Run Docker containers.
         run: |
           echo $REMOTE_DOCKER_DC_YAML_FILEPATH
+          echo '${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }}'
           echo '$REMOTE_DOCKER_DC_YAML_FILEPATH'
           echo '{$REMOTE_DOCKER_DC_YAML_FILEPATH}'
           echo '${REMOTE_DOCKER_DC_YAML_FILEPATH}'
