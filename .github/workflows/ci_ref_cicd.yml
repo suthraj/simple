@@ -93,7 +93,7 @@ jobs:
   # PURPOSE: Deploy repo. to the cloud server.
   # USE-CASE: Push source code updates.  
   DeployToServer:
-    name: Deploy to the '${{ GITHUB_ENVIRONMENT_STAGING }}' environemnt.
+    name: Deploy to the '{{ $GITHUB_ENVIRONMENT_STAGING }}' environemnt.
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
