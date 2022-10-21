@@ -24,7 +24,7 @@ env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
   TIMED_DELAY: 5
-  GITHUB_ENVIRONMENT_SERVER: server
+  GITHUB_ENVIRONMENT_DEV: development
   GITHUB_ENVIRONMENT_STAGING: staging
   GITHUB_ENVIRONMENT_PROD: production
 
@@ -33,7 +33,9 @@ env:
 
   REMOTE_GITHUB: /home/ubuntu/projects/s_git/github/
   REMOTE_DIR_TMP: tmp/
+  REMOTE_DIR_DEV: dev/
   REMOTE_DIR_STAGING: staging/
+  REMOTE_DIR_PROD: prod/
   REMOTE_DC_YAML_FILE: docker-compose.yml
   #REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
@@ -97,10 +99,12 @@ jobs:
   # PURPOSE: Deploy repo. to cloud server via specified GitHub environment.
   # USE-CASE: Push source code updates.  
   DeployToServer:
+    # WARN: For some reason, can't seem to use environment variable to assign the name. 
     name: "Deploy to GitHub environemnt: 'development'"
-    # [GitHub Action]: Set/Assign the workflow environment. 
+    # [GitHub Action]: Set/Assign the specific named workflow environment to use to run this job. 
     environment:
       # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
+      # WARN: For some reason, can't seem to use environment variable to assign the name. 
       name: development
       #url: 'http://test.myapp.com'
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
@@ -111,12 +115,13 @@ jobs:
     timeout-minutes: 10
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_FILENAME_KEY: ssh_private_key
       JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_STAGING
+      JOB_SSH_FILENAME_KEY: ssh_private_key
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
+      ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}
 
     steps:
       - name: MESSAGE (Start)
@@ -176,7 +181,8 @@ jobs:
           echo "REMOTE: Show all existing GitHub sub-directories (pre)"
           ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
           echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
-          ssh $JOB_SSH_HOSTNAME "mkdir -p ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
+          ssh $JOB_SSH_HOSTNAME "mkdir -p ${{ env.JOB_REMOTE_TARGET }}"
+          #ssh $JOB_SSH_HOSTNAME "mkdir -p ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
           echo "REMOTE: Show all existing GitHub sub-directories (post)"
           ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
 
