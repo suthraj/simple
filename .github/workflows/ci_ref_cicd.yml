@@ -98,12 +98,13 @@ jobs:
     runs-on: ubuntu-latest
     # [GitHub Action]: Set/Assign the workflow environment. 
     environment:
-      # Name must be identical (ie. case-sensitive).
+      # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
       name: staging
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
       JOB_SSH_FILENAME_KEY: key_staging
+      JOB_SSH_HOSTNAME: staging
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
@@ -116,20 +117,22 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # SSH - Configure SSH.
-      - name: SSH - Configure SSH
+      # Configure SSH (GitHub workflow runnner). 
+      - name: Configure SSH
         run: |
           echo "Start the ssh-agent in the background."
           ssh-agent -c
           echo "Create SSH directory."
+          pwd
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
           echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
+          # Create SSH file 'config'
           cat >>${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_CONFIG }} <<END
-          Host staging
+          Host $JOB_SSH_HOSTNAME
             HostName $JOB_REMOTE_HOST
             User $JOB_REMOTE_USER
             IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
@@ -161,27 +164,27 @@ jobs:
       - name: SSH - Verify remote server file structure
         run: |
           echo "REMOTE: List files & folders"
-          ssh staging "sudo ls -lah"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah"
           echo "REMOTE: Show all existing GitHub sub-directories (pre)"
-          ssh staging "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
           echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
-          ssh staging "mkdir -p ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
+          ssh $JOB_SSH_HOSTNAME "mkdir -p ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
           echo "REMOTE: Show all existing GitHub sub-directories (post)"
-          ssh staging "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
 
       # SSH - Show remote machine docker container info.
       - name: SSH - Show remote server Docker installation info
         run: |
           echo "REMOTE: Show Docker engine version."
-          ssh staging "sudo docker --version"
+          ssh $JOB_SSH_HOSTNAME "sudo docker --version"
           echo "REMOTE: Show Docker Compose version."
-          ssh staging "sudo docker-compose --version"
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose --version"
 
       # SSH - Show remote machine docker container info.
       - name: SSH - Show all Docker container info/status (pre)
         run: |
           echo "REMOTE: Show all existing containers"
-          ssh staging "sudo docker ps -a"
+          ssh $JOB_SSH_HOSTNAME "sudo docker ps -a"
 
       # SSH - Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
@@ -201,7 +204,7 @@ jobs:
       - name: Build & Run Docker containers.
         run: |
           echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
-          ssh staging "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} up -d"
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -214,11 +217,11 @@ jobs:
       - name: SSH - Show all Docker container info/status (post)
         run: |
           echo "REMOTE: Show all existing containers"
-          ssh staging 'sudo docker ps -a'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker ps -a'
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
-        run: ssh staging "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} down"
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} down"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
