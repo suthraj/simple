@@ -152,7 +152,7 @@ jobs:
           echo "REMOTE: Show all existing GitHub sub-directories"
           ssh staging 'sudo ls -lah ${{ env.REMOTE_DOCKER_DC_GITHUB }}'
           echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
-          ssh staging 'sudo mkdir -p ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH_TMP }}'
+          ssh staging 'mkdir -p ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH_TMP }}'
           
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
