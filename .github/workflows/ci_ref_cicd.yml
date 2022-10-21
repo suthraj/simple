@@ -23,6 +23,8 @@ on:
 env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
+  TIMED_DELAY: 5
+
   SSH_DIR_PATH: ~/.ssh/
   SSH_FILENAME_KEY: key_staging
   SSH_FILENAME_CONFIG: config
@@ -31,11 +33,8 @@ env:
   REMOTE_DIR_TMP: tmp/
   REMOTE_DIR_STAGING: staging/
   REMOTE_DC_YAML_FILE: docker-compose.yml
-  REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
   #REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
-  TIMED_DELAY: 5
-
 
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
@@ -108,7 +107,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
       REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
       REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-      TARGET: $REMOTE_TARGET
+      REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
       #TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
@@ -192,7 +191,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ env.REMOTE_HOST }}
           REMOTE_USER: ${{ env.REMOTE_USER }}
-          TARGET: ${{ env.TARGET }}
+          TARGET: ${{ env.REMOTE_TARGET }} 
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
