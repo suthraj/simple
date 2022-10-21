@@ -152,12 +152,6 @@ jobs:
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
         uses: easingthemes/ssh-deploy@main
-#        env:
-#          SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
-#          REMOTE_HOST: $REMOTE_HOST
-#          REMOTE_USER: $REMOTE_USER
-#          TARGET: $TARGET
-
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
           REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
