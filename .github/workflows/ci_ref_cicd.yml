@@ -34,6 +34,7 @@ env:
   REMOTE_DOCKER_DC_DIR_TMP: tmp/
   REMOTE_DOCKER_DC_DIR_STAGING: staging/
   REMOTE_DOCKER_DC_YAML_FILE: docker-compose.yml
+  REMOTE_TARGET: "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
   #REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
   TIMED_DELAY: 5
@@ -104,7 +105,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
       REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
       REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-      TARGET: $REMOTE_DOCKER_DC_GITHUB$REMOTE_DOCKER_DC_DIR_TMP
+      TARGET: "${{ env.REMOTE_TARGET }}"
       #TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
