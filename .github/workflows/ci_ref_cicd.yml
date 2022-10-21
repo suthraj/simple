@@ -104,7 +104,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
       REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
       REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-      TARGET: ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}
+      TARGET: "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
       #TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
