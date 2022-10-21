@@ -61,6 +61,10 @@ jobs:
       - name: MESSAGE (Pre).
         run: echo "Git Action Workflow - JOB 01 -  START..."
 
+      # Show the GitHub Action default environment variables (Ubuntu).
+      - name: List of the GitHub Actions environment variables on Windows
+        run: env
+
       # Dump GitHub context.
       - name: Dump GitHub context
         env:
@@ -90,9 +94,10 @@ jobs:
         run: echo "Git Action Workflow - JOB 01 - DONE."
 
   # JOB-02.
-  # PURPOSE: Deploy repo. to the cloud server.
+  # PURPOSE: Deploy repo. to cloud server via specified GitHub environment.
   # USE-CASE: Push source code updates.  
   DeployToServer:
+    name: "Deploy to GitHub environemnt: 'development'"
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
@@ -108,7 +113,6 @@ jobs:
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
-    name: "Deploy to the '${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}' environemnt."
     # [GitHub Action]: Set/Assign the workflow environment. 
     environment:
       # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
