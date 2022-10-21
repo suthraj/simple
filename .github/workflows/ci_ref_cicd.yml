@@ -151,15 +151,15 @@ jobs:
       - name: SSH - Show remote server Docker installation info
         run: |
           echo "REMOTE: Show Docker engine version."
-          ssh staging 'sudo docker --version'
+          ssh staging "sudo docker --version"
           echo "REMOTE: Show Docker Compose version."
-          ssh staging 'sudo docker-compose --version'
+          ssh staging "sudo docker-compose --version"
 
       # Show remote machine docker container info.
       - name: SSH - Show all Docker container info/status (pre)
         run: |
           echo "REMOTE: Show all existing containers"
-          ssh staging 'sudo docker ps -a'
+          ssh staging "sudo docker ps -a"
 
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
@@ -169,16 +169,12 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
           REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
           TARGET: "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
-          #TARGET: $REMOTE_DOCKER_DC_YAML_FILEPATH_TMP
 
       # Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
         run: |
-          echo '${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}'
-          ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} up -d'
-#          echo '${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }}'
-#          echo '${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }}'
-#          ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} up -d'
+          echo "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
+          ssh staging "sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -195,9 +191,7 @@ jobs:
 
       # Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
-        run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} down'
-#        run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH }} down'
-#        run: ssh staging 'sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} down'
+        run: ssh staging "sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} down"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
