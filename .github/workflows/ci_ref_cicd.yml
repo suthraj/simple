@@ -26,7 +26,6 @@ env:
   TIMED_DELAY: 5
 
   SSH_DIR_PATH: ~/.ssh/
-  SSH_FILENAME_KEY: key_staging
   SSH_FILENAME_CONFIG: config
 
   REMOTE_GITHUB: /home/ubuntu/projects/s_git/github/
@@ -104,6 +103,7 @@ jobs:
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
+      JOB_SSH_FILENAME_KEY: key_staging
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
@@ -125,18 +125,18 @@ jobs:
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
-          chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
+          chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           cat >>${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_CONFIG }} <<END
           Host staging
             HostName $JOB_REMOTE_HOST
             User $JOB_REMOTE_USER
-            IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+            IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
             StrictHostKeyChecking no
           END
           ls -lah ${{ env.SSH_DIR_PATH }}
-          cat ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+          cat ${{ env.SSH_DIR_PATH }}${{ env.JOB_SSH_FILENAME_KEY }}
 
 #          echo "Start the ssh-agent in the background."
 #          ssh-agent -c
@@ -188,9 +188,13 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         # Define 'step' level environment variables.
         env:
+          # REQUIRED: 01/03
           SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          # REQUIRED: 02/03
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
+          # REQUIRED: 03/03
           REMOTE_USER: ${{ env.JOB_REMOTE_USER }}
+          # OPTIONAL:
           TARGET: ${{ env.JOB_REMOTE_TARGET }} 
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
