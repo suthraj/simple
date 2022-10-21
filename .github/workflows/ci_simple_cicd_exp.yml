@@ -1,9 +1,9 @@
-# FILE: ci_simple_cicd.yml
+# FILE: ci_simple_cicd_exp.yml
 # DATE (created): Oct 17, 2022
 # PURPOSE: 
 #  This GitAction workflow defines my CI/CD pipeline for this project. 
 
-name: CI-SIMPLE-CI-CD
+name: CI-SIMPLE-CI-CD-Exp
 
 on:
   push:

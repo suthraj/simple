@@ -1,14 +1,14 @@
-# FILE: ci_simple_cicd.yml
-# DATE (created): Oct 17, 2022
+# FILE: ci_ref_cicd.yml
+# DATE (created): Oct 20, 2022
 # PURPOSE: 
 #  This GitAction workflow defines my CI/CD pipeline for this project. 
 
-name: CI-SIMPLE-CI-CD
+name: CI-REF-CI-CD
 
 on:
   push:
     #branches: [ "master" ]
-    branches-ignore: ["master"]
+    #branches-ignore: ["master"]
 
   pull_request:
     #branches: [ "master", "develop" ]
@@ -75,34 +75,10 @@ jobs:
       - name: MESSAGE (Post).
         run: echo "Git Action Workflow - JOB 01 - DONE."
 
-
   # JOB-02.
-  # PURPOSE: Deploy repo. to the following environment: development
+  # PURPOSE: Deploy repo. to the cloud server.
   # USE-CASE: Push source code updates.  
-  DeployToDev:
-    name: Deploy to the 'development' environemnt.
-    if: github.event_name == 'pull_request'
-    needs: [Build]
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    environment:
-      # Name must be identical (ie. case-sensitive).
-      name: development
-      #url: 'http://dev.myapp.com'
-    timeout-minutes: 10
-    steps:
-      - name: Deploy
-        run: echo "Performing deployment - DEVELOPMENT - START..." 
-
-
-      - name: Deploy
-        run: echo "Performing deployment - DEVELOPMENT - DONE." 
-
-
-  # JOB-03.
-  # PURPOSE: Deploy repo. to the following environment: 'staging'
-  # USE-CASE: Push source code updates.  
-  DeployToStaging:
+  DeployToServer:
     name: Deploy to the 'staging' environemnt.
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
@@ -199,26 +175,3 @@ jobs:
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
-
-
-  # JOB-04.
-  # PURPOSE: Deploy repo. to the following environment: 'production'
-  # USE-CASE: Push source code updates.
-  # NOTE: If the environment has been conigured to require approval, then manual approval is required (ie. continouse delivery).
-  # Otherwise (ie. approval is disabled) then auto deployment (ie. continouse deployment) to production envrionment will occur.
-  DeployToProduction:
-    name: Deploy to the 'production' environemnt.
-    needs: [DeployToStaging]
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    environment:
-      # Name must be identical (ie. case-sensitive).
-      name: production
-      #url: 'http://www.myapp.com'
-    timeout-minutes: 10
-    steps:
-      - name: MESSAGE (Start)
-        run: echo "Performing deployment - PRODUCTION - START..." 
-
-      - name: MESSAGE (End)
-        run: echo "Performing deployment - PRODUCTION - DONE." 
