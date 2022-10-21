@@ -26,6 +26,7 @@ env:
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
+  REMOTE_DOCKER_DC_GITHUB: /home/ubuntu/projects/s_git/github/
   REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   REMOTE_DOCKER_DC_YAML_FILEPATH_STAGING: /home/ubuntu/projects/s_git/github/staging/
   REMOTE_DOCKER_DC_YAML_FILE: docker-compose.yml
@@ -148,6 +149,10 @@ jobs:
           ssh staging 'sudo ls -lah'
           echo "REMOTE: Show all existing containers"
           ssh staging 'sudo docker ps -a'
+          echo "REMOTE: Show all existing GitHub sub-directories"
+          ssh staging 'sudo ls -lah ${{ env.REMOTE_DOCKER_DC_GITHUB }}'
+          echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
+          ssh staging 'sudo mkdir -p ${{ env.REMOTE_DOCKER_DC_YAML_FILEPATH_TMP }}'
           
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
@@ -156,7 +161,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
           REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
           REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+          TARGET: $REMOTE_DOCKER_DC_YAML_FILEPATH_TMP
 
       # Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
