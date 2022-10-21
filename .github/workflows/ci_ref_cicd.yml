@@ -108,12 +108,6 @@ jobs:
       REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
       REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
-
-      #SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
-      #REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
-      #REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-      #REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
-      #TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
       - name: MESSAGE (Start)
