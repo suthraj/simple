@@ -107,7 +107,7 @@ jobs:
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_FILENAME_KEY: key_staging
+      JOB_SSH_FILENAME_KEY: ssh_private_key
       JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_STAGING
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
