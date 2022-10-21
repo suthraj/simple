@@ -104,10 +104,10 @@ jobs:
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
-      SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
-      REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
-      REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
-      REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
+      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
+      JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
+      JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
     timeout-minutes: 10
     steps:
       - name: MESSAGE (Start)
@@ -125,13 +125,13 @@ jobs:
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           cat >>${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_CONFIG }} <<END
           Host staging
-            HostName $REMOTE_HOST
-            User $REMOTE_USER
+            HostName $JOB_REMOTE_HOST
+            User $JOB_REMOTE_USER
             IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
             StrictHostKeyChecking no
           END
@@ -144,13 +144,13 @@ jobs:
 #          mkdir -p ~/.ssh/
 #          ls -lah ~/.ssh/
 #          echo "Create key file."
-#          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
+#          echo "$JOB_SSH_PRIVATE_KEY" > ~/.ssh/key_staging
 #          chmod 600 ~/.ssh/key_staging
 #          ls -lah ~/.ssh/
 #          cat >>~/.ssh/config <<END
 #          Host staging
-#            HostName $REMOTE_HOST
-#            User $REMOTE_USER
+#            HostName $JOB_REMOTE_HOST
+#            User $JOB_REMOTE_USER
 #            IdentityFile ~/.ssh/key_staging
 #            StrictHostKeyChecking no
 #          END
@@ -188,10 +188,10 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         # Define 'step' level environment variables.
         env:
-          SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ env.REMOTE_HOST }}
-          REMOTE_USER: ${{ env.REMOTE_USER }}
-          TARGET: ${{ env.REMOTE_TARGET }} 
+          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
+          REMOTE_USER: ${{ env.JOB_REMOTE_USER }}
+          TARGET: ${{ env.JOB_REMOTE_TARGET }} 
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
