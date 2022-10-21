@@ -19,7 +19,7 @@ on:
 
 
 # Create custom CI/CD variables.
-# Define custom workflow environment constants (ie. secrets etc.)
+# Define 'workflow' level (aka "global") environment variables.
 env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
@@ -102,7 +102,7 @@ jobs:
       # Name must be identical (ie. case-sensitive).
       name: staging
       #url: 'http://test.myapp.com'
-    # Set env variables at the 'job' level.
+    # Define 'job' level environment variables.
     env:
       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
       REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
@@ -187,6 +187,7 @@ jobs:
       # SSH - Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
         uses: easingthemes/ssh-deploy@main
+        # Define 'step' level environment variables.
         env:
           SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ env.REMOTE_HOST }}
