@@ -98,6 +98,11 @@ jobs:
   # USE-CASE: Push source code updates.  
   DeployToServer:
     name: "Deploy to GitHub environemnt: 'development'"
+    # [GitHub Action]: Set/Assign the workflow environment. 
+    environment:
+      # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
+      name: development
+      #url: 'http://test.myapp.com'
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
@@ -106,19 +111,12 @@ jobs:
     timeout-minutes: 10
     # Define 'job' level environment variables.
     env:
-      JOB_GITHUB_ENVIRONMENT: staging
       JOB_SSH_FILENAME_KEY: ssh_private_key
       JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_STAGING
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
-    # [GitHub Action]: Set/Assign the workflow environment. 
-    environment:
-      # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
-      #name: $GITHUB_ENVIRONMENT_STAGING
-      name: ${{ env.JOB_GITHUB_ENVIRONMENT }}
-      #url: 'http://test.myapp.com'
 
     steps:
       - name: MESSAGE (Start)
