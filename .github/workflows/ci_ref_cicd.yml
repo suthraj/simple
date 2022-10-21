@@ -27,17 +27,20 @@ env:
   SSH_FILENAME_KEY: key_staging
   SSH_FILENAME_CONFIG: config
 
-  DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
-  DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
-  DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
-  REMOTE_DOCKER_DC_GITHUB: /home/ubuntu/projects/s_git/github/
-  REMOTE_DOCKER_DC_DIR_TMP: tmp/
-  REMOTE_DOCKER_DC_DIR_STAGING: staging/
-  REMOTE_DOCKER_DC_YAML_FILE: docker-compose.yml
-  REMOTE_TARGET: $REMOTE_DOCKER_DC_GITHUB$REMOTE_DOCKER_DC_DIR_TMP
+  REMOTE_GITHUB: /home/ubuntu/projects/s_git/github/
+  REMOTE_DIR_TMP: tmp/
+  REMOTE_DIR_STAGING: staging/
+  REMOTE_DC_YAML_FILE: docker-compose.yml
+  REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
   #REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
   TIMED_DELAY: 5
+
+
+  DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
+  DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
+  DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
+
 
 jobs:
 
@@ -162,11 +165,11 @@ jobs:
           echo "REMOTE: List files & folders"
           ssh staging "sudo ls -lah"
           echo "REMOTE: Show all existing GitHub sub-directories (pre)"
-          ssh staging "sudo ls -lah ${{ env.REMOTE_DOCKER_DC_GITHUB }}"
+          ssh staging "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
           echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
-          ssh staging "mkdir -p ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
+          ssh staging "mkdir -p ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
           echo "REMOTE: Show all existing GitHub sub-directories (post)"
-          ssh staging "sudo ls -lah ${{ env.REMOTE_DOCKER_DC_GITHUB }}"
+          ssh staging "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
 
       # SSH - Show remote machine docker container info.
       - name: SSH - Show remote server Docker installation info
@@ -194,8 +197,8 @@ jobs:
       # SSH - Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
         run: |
-          echo "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
-          ssh staging "sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} up -d"
+          echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
+          ssh staging "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -212,7 +215,7 @@ jobs:
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
-        run: ssh staging "sudo docker-compose -f ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}${{ env.REMOTE_DOCKER_DC_YAML_FILE }} down"
+        run: ssh staging "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} down"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
