@@ -122,7 +122,7 @@ jobs:
           echo "Start the ssh-agent in the background."
           ssh-agent -c
           echo "Create SSH directory."
-          mkdir -p ${{ SSH_DIR_PATH }}
+          mkdir -p ${{ env.SSH_DIR_PATH }}
           #mkdir -p ~/.ssh/
           ls -lah ~/.ssh/
           echo "Create key file."
