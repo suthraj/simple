@@ -218,6 +218,7 @@ jobs:
         run: |
           echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
           echo "${{ env.JOB_REMOTE_TARGET }}"
+          echo "${{ env.JOB_REMOTE_TARGET }}${{ env.REMOTE_DC_YAML_FILE }}"
           ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}${{ env.REMOTE_DC_YAML_FILE }} up -d"
 
       # Timed delayed for database to spin up.
