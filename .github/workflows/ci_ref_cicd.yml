@@ -24,6 +24,9 @@ env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
   TIMED_DELAY: 5
+  GITHUB_ENVIRONMENT_SERVER: server
+  GITHUB_ENVIRONMENT_STAGING: staging
+  GITHUB_ENVIRONMENT_STAGING: production
 
   SSH_DIR_PATH: ~/.ssh/
   SSH_FILENAME_CONFIG: config
@@ -90,7 +93,7 @@ jobs:
   # PURPOSE: Deploy repo. to the cloud server.
   # USE-CASE: Push source code updates.  
   DeployToServer:
-    name: Deploy to the 'staging' environemnt.
+    name: Deploy to the '${{ env.GITHUB_ENVIRONMENT_STAGING }}' environemnt.
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
@@ -99,12 +102,13 @@ jobs:
     # [GitHub Action]: Set/Assign the workflow environment. 
     environment:
       # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
-      name: staging
+      name: ${{ env.GITHUB_ENVIRONMENT_STAGING }}
+      #name: staging
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
       JOB_SSH_FILENAME_KEY: key_staging
-      JOB_SSH_HOSTNAME: staging
+      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_STAGING
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
@@ -112,7 +116,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: MESSAGE (Start)
-        run: echo "Performing deployment - STAGING - START..." 
+        run: echo "Performing deployment - START..." 
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
@@ -187,7 +191,7 @@ jobs:
           ssh $JOB_SSH_HOSTNAME "sudo docker ps -a"
 
       # SSH - Deploy code with rsync over SSH.
-      - name: Deploy to Server 01 - Staging
+      - name: SSH - Deploy to Server 01
         uses: easingthemes/ssh-deploy@main
         # Define 'step' level environment variables.
         env:
@@ -201,7 +205,7 @@ jobs:
           TARGET: ${{ env.JOB_REMOTE_TARGET }} 
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
-      - name: Build & Run Docker containers.
+      - name: SSH - Build & Run Docker containers.
         run: |
           echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}"
           ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} up -d"
@@ -224,4 +228,4 @@ jobs:
         run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}${{ env.REMOTE_DC_YAML_FILE }} down"
 
       - name: MESSAGE (End)
-        run: echo "Performing deployment - STAGING - DONE." 
+        run: echo "Performing deployment - DONE." 
