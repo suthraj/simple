@@ -26,7 +26,10 @@ env:
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
-  REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
+  REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
+  REMOTE_DOCKER_DC_YAML_FILEPATH_STAGING: /home/ubuntu/projects/s_git/github/staging/
+  REMOTE_DOCKER_DC_YAML_FILE: docker-compose.yml
+  #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
   TIMED_DELAY: 5
 
 jobs:
@@ -85,10 +88,17 @@ jobs:
     needs: [Build]
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    # [GitHub Action]: Set/Assign the workflow environment. 
     environment:
       # Name must be identical (ie. case-sensitive).
       name: staging
       #url: 'http://test.myapp.com'
+    # Set env variables at the 'job' level.
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+      REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+      REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+      TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
       - name: MESSAGE (Start)
@@ -98,11 +108,11 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: SSH - Configure SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
-          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+#        env:
+#          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+#          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+#          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+#          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
         run: |
           echo "Start the ssh-agent in the background."
           ssh-agent -c
@@ -142,11 +152,11 @@ jobs:
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
         uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
-          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+#        env:
+#          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
+#          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
+#          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
+#          TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
 
       # Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
