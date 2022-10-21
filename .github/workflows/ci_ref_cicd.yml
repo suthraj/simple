@@ -152,7 +152,7 @@ jobs:
       # Deploy code with rsync over SSH.
       - name: Deploy to Server 01 - Staging
         uses: easingthemes/ssh-deploy@main
-        env:
+#        env:
 #          SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
 #          REMOTE_HOST: $REMOTE_HOST
 #          REMOTE_USER: $REMOTE_USER
