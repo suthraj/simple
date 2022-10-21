@@ -102,8 +102,8 @@ jobs:
     # [GitHub Action]: Set/Assign the workflow environment. 
     environment:
       # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
-      name: $GITHUB_ENVIRONMENT_STAGING
-      #name: staging
+      #name: $GITHUB_ENVIRONMENT_STAGING
+      name: staging
       #url: 'http://test.myapp.com'
     # Define 'job' level environment variables.
     env:
