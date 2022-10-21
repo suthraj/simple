@@ -104,7 +104,8 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
       REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
       REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-      TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
+      TARGET: ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}
+      #TARGET: ${{ secrets.TARGET_DIR_AWS_LS_STAGING }}
     timeout-minutes: 10
     steps:
       - name: MESSAGE (Start)
@@ -184,10 +185,10 @@ jobs:
       - name: Deploy to Server 01 - Staging
         uses: easingthemes/ssh-deploy@main
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_AWS_LS_STAGING }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS_AWS_LS_STAGING }}
-          REMOTE_USER: ${{ secrets.USERNAME_AWS_LS_STAGING }}
-          TARGET: ${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}
+          SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ env.REMOTE_HOST }}
+          REMOTE_USER: ${{ env.REMOTE_USER }}
+          TARGET: ${{ env.TARGET }}
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
       - name: Build & Run Docker containers.
