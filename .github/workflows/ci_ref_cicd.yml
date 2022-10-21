@@ -24,7 +24,8 @@ env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
   SSH_DIR_PATH: ~/.ssh/
-  SSH_FILENAME: key_staging
+  SSH_FILENAME_KEY: key_staging
+  SSH_FILENAME_CONFIG: config
 
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
@@ -123,21 +124,39 @@ jobs:
           ssh-agent -c
           echo "Create SSH directory."
           mkdir -p ${{ env.SSH_DIR_PATH }}
-          #mkdir -p ~/.ssh/
-          ls -lah ~/.ssh/
+          ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
-          chmod 600 ~/.ssh/key_staging
-          ls -lah ~/.ssh/
-          cat >>~/.ssh/config <<END
+          echo "$SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+          chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+          ls -lah ${{ env.SSH_DIR_PATH }}
+          cat >>${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_CONFIG }} <<END
           Host staging
             HostName $REMOTE_HOST
             User $REMOTE_USER
-            IdentityFile ~/.ssh/key_staging
+            IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
             StrictHostKeyChecking no
           END
-          ls -lah ~/.ssh/
-          cat ~/.ssh/key_staging
+          ls -lah ${{ env.SSH_DIR_PATH }}
+          cat ${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_KEY }}
+
+#          echo "Start the ssh-agent in the background."
+#          ssh-agent -c
+#          echo "Create SSH directory."
+#          mkdir -p ~/.ssh/
+#          ls -lah ~/.ssh/
+#          echo "Create key file."
+#          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key_staging
+#          chmod 600 ~/.ssh/key_staging
+#          ls -lah ~/.ssh/
+#          cat >>~/.ssh/config <<END
+#          Host staging
+#            HostName $REMOTE_HOST
+#            User $REMOTE_USER
+#            IdentityFile ~/.ssh/key_staging
+#            StrictHostKeyChecking no
+#          END
+#          ls -lah ~/.ssh/
+#          cat ~/.ssh/key_staging
 
       # Show remote machine docker container info.
       - name: SSH - Verify remote server file structure
