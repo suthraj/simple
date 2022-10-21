@@ -121,7 +121,6 @@ jobs:
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
-      ${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_TMP }}
 
     steps:
       - name: MESSAGE (Start)
