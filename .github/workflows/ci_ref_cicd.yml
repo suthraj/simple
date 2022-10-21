@@ -34,7 +34,7 @@ env:
   REMOTE_DOCKER_DC_DIR_TMP: tmp/
   REMOTE_DOCKER_DC_DIR_STAGING: staging/
   REMOTE_DOCKER_DC_YAML_FILE: docker-compose.yml
-  REMOTE_TARGET: "${{ env.REMOTE_DOCKER_DC_GITHUB }}${{ env.REMOTE_DOCKER_DC_DIR_TMP }}"
+  REMOTE_TARGET: "${{ REMOTE_DOCKER_DC_GITHUB }}${{ REMOTE_DOCKER_DC_DIR_TMP }}"
   #REMOTE_DOCKER_DC_YAML_FILEPATH_TMP: /home/ubuntu/projects/s_git/github/tmp/
   #REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
   TIMED_DELAY: 5
