@@ -2,9 +2,7 @@
 # DATE (created): Oct 17, 2022
 # PURPOSE: 
 #  This GitAction workflow will run the required service Docker containers (via Docker Compose) & perform basic healthchecks. 
-
 name: CI-SIMPLE-Basic
-
 
 on:
 

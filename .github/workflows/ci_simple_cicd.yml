@@ -4,11 +4,19 @@
 #  This GitAction workflow defines my CI/CD pipeline for this project. 
 name: CI-SIMPLE-CI-CD
 on:
-  push:
+
+  # Only trigger, when the basic workflow (ie. 'CI-SIMPLE-Basic') succeeded.
+  ## The 'basic' workflow performs no remote actions. 
+  workflow_run:
+    workflows: ["CI-REF-CI-CD"]
+    types:
+      - completed
+  
+  #push:
     #branches: [ "master" ]
     #branches-ignore: ["master"]
 
-  pull_request:
+  #pull_request:
     #branches: [ "master", "develop" ]
     #branches-ignore: ["master"]
 

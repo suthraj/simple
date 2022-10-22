@@ -13,11 +13,11 @@ on:
     workflows: ["CI-SIMPLE-Basic"]
     types:
       - completed
-  push:
+  #push:
     #branches: [ "master" ]
     #branches-ignore: ["master"]
 
-  pull_request:
+  #pull_request:
     #branches: [ "master", "develop" ]
     #branches-ignore: ["master"]
 
