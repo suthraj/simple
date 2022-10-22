@@ -120,9 +120,9 @@ jobs:
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
-      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
+      #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
       #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_DEV
-      #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_STAGING
+      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_STAGING
 
     steps:
       - name: MESSAGE (Start)
@@ -242,11 +242,11 @@ jobs:
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
-        # By default, the only things removed are containers for services & networks defined in the Compose file.
+        # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
         #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
-        # Default + Remove all associated images & volumes aswell.
+        # OPTION-02: Default + Remove all associated images & volumes aswell.
         run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
-        # Remove containers for services not defined in the Compose file.
+        # OPTION-03: Remove containers for services not defined in the Compose file.
         #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
 
       - name: MESSAGE (End)
