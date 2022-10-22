@@ -6,6 +6,13 @@
 name: CI-REF-CI-CD
 
 on:
+
+  # Only trigger, when the basic workflow (ie. 'CI-SIMPLE-Basic') succeeded.
+  ## The 'basic' workflow performs no remote actions. 
+  workflow_run:
+    workflows: ["CI-SIMPLE-Basic"]
+    types:
+      - completed
   push:
     #branches: [ "master" ]
     #branches-ignore: ["master"]

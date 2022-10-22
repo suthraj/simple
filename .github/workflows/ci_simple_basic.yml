@@ -5,15 +5,17 @@
 
 name: CI-SIMPLE-Basic
 
+
 on:
+
   push:
     #branches: [ "main" ]
     #branches: [ "main", "develop" ]
-    branches-ignore: [main]
+    #branches-ignore: [main]
     #branches-ignore: [develop]
 
   pull_request:
-    branches: [ "main", "develop" ]
+    #branches: [ "main", "develop" ]
     #branches: [ "main" ]
 
   # SR-ADD: Allows you to run this workflow manually from the Actions tab
