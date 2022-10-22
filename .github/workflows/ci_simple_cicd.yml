@@ -4,19 +4,11 @@
 #  This GitAction workflow defines my CI/CD pipeline for this project. 
 name: CI-SIMPLE-CI-CD
 on:
-
-  # Only trigger, when the basic workflow (ie. 'CI-SIMPLE-Basic') succeeded.
-  ## The 'basic' workflow performs no remote actions. 
-  workflow_run:
-    workflows: ["CI-REF-CI-CD"]
-    types:
-      - completed
-  
-  #push:
+  push:
     #branches: [ "master" ]
     #branches-ignore: ["master"]
 
-  #pull_request:
+  pull_request:
     #branches: [ "master", "develop" ]
     #branches-ignore: ["master"]
 
@@ -42,7 +34,7 @@ env:
   REMOTE_DIR_DEV: dev/
   REMOTE_DIR_STAGING: staging/
   REMOTE_DIR_PROD: prod/
-  REMOTE_DC_YAML_FILE: docker-compose.yml
+  #REMOTE_DC_YAML_FILE: docker-compose.yml
   REMOTE_DC_YAML_FILE_PROD: docker-compose_prod.yml
   #  REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
 
@@ -197,7 +189,7 @@ jobs:
       - name: SSH - Build & Run Docker containers.
         run: |
           # NOTE-WARN: Mixing 'global' & 'job' level env variables presents some wierd anamolies.
-          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE up -d"
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -215,11 +207,11 @@ jobs:
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
         # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down"
         # OPTION-02: Default + Remove all associated images & volumes aswell.
-        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down -v --rmi all"
         # OPTION-03: Remove containers for services not defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down --remove-orphans"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - DEVELOPMENT - DONE." 
@@ -234,7 +226,8 @@ jobs:
     name: Deploy to the 'staging' environemnt.
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
-    needs: [Build]
+    needs: [DeployToDev]
+    #needs: [Build]
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment:
