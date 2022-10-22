@@ -17,7 +17,6 @@ on:
   # SR-ADD: Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-
 # Create custom CI/CD variables.
 # Define 'workflow' level (aka "global") environment variables.
 env:
@@ -65,7 +64,7 @@ jobs:
         run: echo "Git Action Workflow - JOB 01 -  START..."
 
       # Show the GitHub Action default environment variables (Ubuntu).
-      - name: List of the GitHub Actions environment variables on Windows
+      - name: List of the GitHub Actions environment variables on Ubuntu
         run: env
 
       # Dump GitHub context.
@@ -100,13 +99,14 @@ jobs:
   # PURPOSE: Deploy repo. to cloud server via specified GitHub environment.
   # USE-CASE: Push source code updates.  
   DeployToServer:
-    # WARN: For some reason, can't seem to use environment variable to assign the name. 
-    name: "Deploy to GitHub environemnt: 'development'"
+    # WARNING: For some reason, can't seem to use environment variable to assign the name. 
+    name: "Deploy using GitHub environemnt: 'development'"
     # [GitHub Action]: Set/Assign the specific named workflow environment to use to run this job. 
     environment:
       # Name must be identical (ie. case-sensitive) to name assigned when creating GitHub environment.
-      # WARN: For some reason, can't seem to use environment variable to assign the name. 
+      # WARNING: For some reason, can't seem to use environment variable to assign the name. 
       name: development
+      #name: staging
       #url: 'http://test.myapp.com'
     # IMPORTANT: Condition true only when commiting or merging into branch 'master'.
     if: github.event.ref == 'refs/heads/master'
@@ -117,11 +117,12 @@ jobs:
     # Define 'job' level environment variables.
     env:
       JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_DEV
-      #JOB_SSH_FILENAME_KEY: ssh_private_key
       JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
-      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
+      #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
+      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_DEV
+      #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_STAGING
 
     steps:
       - name: MESSAGE (Start)
@@ -130,7 +131,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Configure SSH (GitHub workflow runnner). 
+      # Configure SSH (GitHub workflow runnner).
+      # PURPOSE: Creates SSH key file & SSH config file used to connect to remote server from GitHub runner via SSH client.
       - name: Configure SSH
         run: |
           echo "Start the ssh-agent in the background."
@@ -240,7 +242,12 @@ jobs:
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
-        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        # By default, the only things removed are containers for services & networks defined in the Compose file.
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        # Default + Remove all associated images & volumes aswell.
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
+        # Remove containers for services not defined in the Compose file.
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - DONE." 
