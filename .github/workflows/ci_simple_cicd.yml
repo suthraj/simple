@@ -117,12 +117,118 @@ jobs:
       name: development
       #url: 'http://dev.myapp.com'
     timeout-minutes: 10
+    # Define 'job' level environment variables.
+    env:
+      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
+      JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
+      JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      # MODIFY-01/02: Modify parameter as necessary for all subsequent deployments.
+      JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_DEV
+      # MODIFY-02/02: Modify parameter as necessary for all subsequent deployments.
+      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_DEV
     steps:
-      - name: Deploy
+      - name: MESSAGE (Start)
         run: echo "Performing deployment - DEVELOPMENT - START..." 
 
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
-      - name: Deploy
+      # Configure SSH (GitHub workflow runnner).
+      # PURPOSE: Creates SSH key file & SSH config file used to connect to remote server from GitHub runner via SSH client.
+      - name: Configure SSH
+        run: |
+          echo "Start the ssh-agent in the background."
+          ssh-agent -c
+          echo "Create SSH directory."
+          pwd
+          mkdir -p ${{ env.SSH_DIR_PATH }}
+          ls -lah ${{ env.SSH_DIR_PATH }}
+          echo "Create key file."
+          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          ls -lah ${{ env.SSH_DIR_PATH }}
+          # Create SSH file 'config'
+          cat >>${{ env.SSH_DIR_PATH }}${{ env.SSH_FILENAME_CONFIG }} <<END
+          Host $JOB_SSH_HOSTNAME
+            HostName $JOB_REMOTE_HOST
+            User $JOB_REMOTE_USER
+            IdentityFile ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+            StrictHostKeyChecking no
+          END
+          ls -lah ${{ env.SSH_DIR_PATH }}
+          cat ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+
+      # SSH - Show remote machine docker container info.
+      - name: SSH - Verify remote server file structure
+        run: |
+          echo "REMOTE: Show default directory path"
+          ssh $JOB_SSH_HOSTNAME "sudo pwd"
+          echo "REMOTE: List files & folders"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah"
+          echo "REMOTE: Show all existing GitHub sub-directories (pre)"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
+          echo "REMOTE: Create required sub-directory (only if it doesn't already exist)."
+          ssh $JOB_SSH_HOSTNAME "mkdir -p ${{ env.JOB_REMOTE_TARGET }}"
+          echo "REMOTE: Show all existing GitHub sub-directories (post)"
+          ssh $JOB_SSH_HOSTNAME "sudo ls -lah ${{ env.REMOTE_GITHUB }}"
+
+      # SSH - Show remote machine docker container info.
+      - name: SSH - Show remote server Docker installation info
+        run: |
+          echo "REMOTE: Show Docker engine version."
+          ssh $JOB_SSH_HOSTNAME "sudo docker --version"
+          echo "REMOTE: Show Docker Compose version."
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose --version"
+
+      # SSH - Show remote machine docker container info.
+      - name: SSH - Show all Docker container info/status (pre)
+        run: |
+          echo "REMOTE: Show all existing containers"
+          ssh $JOB_SSH_HOSTNAME "sudo docker ps -a"
+
+      # SSH - Deploy code with rsync over SSH.
+      - name: SSH - Deploy to Server 01
+        uses: easingthemes/ssh-deploy@main
+        # Define 'step' level environment variables.
+        env:
+          # REQUIRED-01/03: Assign required SSH key info. 
+          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          # REQUIRED-02/03: Assign required host info.
+          REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
+          # REQUIRED-03/03: Assign required user info.
+          REMOTE_USER: ${{ env.JOB_REMOTE_USER }}
+          # OPTIONAL: Assign the remote path to perform sync on.
+          TARGET: ${{ env.JOB_REMOTE_TARGET }} 
+
+      # SSH - Build & Run the Docker container/services defined in the YAML file.
+      - name: SSH - Build & Run Docker containers.
+        run: |
+          # NOTE-WARN: Mixing 'global' & 'job' level env variables presents some wierd anamolies.
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE up -d"
+
+      # Timed delayed for database to spin up.
+      - name: Timed delay (DB spin up)
+        run: |
+          # Wait for database to be ready (IMPORTANT: Required for DB to spin up).
+          echo "Wait for database to be ready (${{ env.TIMED_DELAY }}s)..."
+          sleep $TIMED_DELAY
+
+      # SSH - Show remote machine docker container info.
+      - name: SSH - Show all Docker container info/status (post)
+        run: |
+          echo "REMOTE: Show all existing containers"
+          ssh $JOB_SSH_HOSTNAME 'sudo docker ps -a'
+
+      # SSH - Stop & remove the Docker container/services defined in the YAML file.
+      - name: SSH - Cleanup - Stop & remove Docker containers.
+        # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        # OPTION-02: Default + Remove all associated images & volumes aswell.
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
+        # OPTION-03: Remove containers for services not defined in the Compose file.
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
+
+      - name: MESSAGE (End)
         run: echo "Performing deployment - DEVELOPMENT - DONE." 
 
 
@@ -368,9 +474,6 @@ jobs:
       - name: SSH - Build & Run Docker containers.
         run: |
           # NOTE-WARN: Mixing 'global' & 'job' level env variables presents some wierd anamolies.
-          echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_PROD }}"
-          echo "${{ env.JOB_REMOTE_TARGET }}${{ env.REMOTE_DC_YAML_FILE }}"
-          echo "${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE"
           ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE up -d"
 
       # Timed delayed for database to spin up.
