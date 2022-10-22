@@ -108,7 +108,7 @@ jobs:
   # USE-CASE: Push source code updates.  
   DeployToDev:
     name: Deploy to the 'development' environemnt.
-    if: github.event_name == 'pull_request'
+    #if: github.event_name == 'pull_request'
     needs: [Build]
     # The type of runner that the job will run on
     runs-on: ubuntu-latest

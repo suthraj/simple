@@ -24,6 +24,7 @@ on:
 env:
   # TODO: Remember to update version on new tag
   LATEST_TAG: 1.0.0
+  TIMED_DELAY: 5
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
 
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
@@ -63,6 +64,13 @@ jobs:
       - name: Build & Run Docker containers.
         run: docker-compose -f $DOCKER_DC_YAML_FILEPATH up -d
         #run: docker-compose -f $DOCKER_DC_YAML_FILEPATH up --build -d --remove-orphans
+
+      # Timed delayed for database to spin up.
+      - name: Timed delay (DB spin up)
+        run: |
+          # Wait for database to be ready (IMPORTANT: Required for DB to spin up).
+          echo "Wait for database to be ready (${{ env.TIMED_DELAY }}s)..."
+          sleep $TIMED_DELAY
 
       # DOCKER: Show active containers (post).
       - name: DOCKER - Show active containers.
