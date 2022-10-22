@@ -2,9 +2,7 @@
 # DATE (created): Oct 17, 2022
 # PURPOSE: 
 #  This GitAction workflow defines my CI/CD pipeline for this project. 
-
 name: CI-SIMPLE-CI-CD
-
 on:
   push:
     #branches: [ "master" ]
@@ -16,7 +14,6 @@ on:
 
   # SR-ADD: Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
 
 # Create custom CI/CD variables.
 # Define 'workflow' level (aka "global") environment variables.
@@ -38,26 +35,14 @@ env:
   REMOTE_DIR_STAGING: staging/
   REMOTE_DIR_PROD: prod/
   REMOTE_DC_YAML_FILE: docker-compose.yml
+  REMOTE_DC_YAML_FILE_PROD: docker-compose_prod.yml
+  #  REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
 
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
 
-
-
-# Create custom CI/CD variables.
-# Define custom workflow environment constants (ie. secrets etc.)
-#env:
-#  # TODO: Remember to update version on new tag
-#  LATEST_TAG: 1.0.0
-#  DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
-#  DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
-#  DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
-#  REMOTE_DOCKER_DC_YAML_FILEPATH: /home/ubuntu/projects/s_git/github/staging/docker-compose.yml
-#  TIMED_DELAY: 5
-
 jobs:
-
   # JOB-01.
   # PURPOSE: Build & Run Docker Compose Linux containers.
   # USE-CASE: Useful as a 'smoke' test to ensure that the created containers are active & functioning as expected.
@@ -119,9 +104,9 @@ jobs:
     timeout-minutes: 10
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      JOB_REMOTE_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       # MODIFY-01/02: Modify parameter as necessary for all subsequent deployments.
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_DEV
       # MODIFY-02/02: Modify parameter as necessary for all subsequent deployments.
@@ -144,7 +129,7 @@ jobs:
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          echo "$JOB_REMOTE_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           # Create SSH file 'config'
@@ -192,7 +177,7 @@ jobs:
         # Define 'step' level environment variables.
         env:
           # REQUIRED-01/03: Assign required SSH key info. 
-          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ env.JOB_REMOTE_SSH_PRIVATE_KEY }}
           # REQUIRED-02/03: Assign required host info.
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
           # REQUIRED-03/03: Assign required user info.
@@ -251,11 +236,13 @@ jobs:
     timeout-minutes: 10
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_PROD
-      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      JOB_REMOTE_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
+      # MODIFY-01/02: Modify parameter as necessary for all subsequent deployments.
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_STAGING
+      # MODIFY-02/02: Modify parameter as necessary for all subsequent deployments.
+      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_PROD
     steps:
       - name: MESSAGE (Start)
         run: echo "Performing deployment - STAGING - START..." 
@@ -275,7 +262,7 @@ jobs:
           # mkdir -p ~/.ssh/
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          echo "$JOB_REMOTE_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           # chmod 600 ~/.ssh/ssh_private_key
           ls -lah ${{ env.SSH_DIR_PATH }}
@@ -325,7 +312,7 @@ jobs:
         # Define 'step' level environment variables.
         env:
           # REQUIRED-01/03: Assign required SSH key info. 
-          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ env.JOB_REMOTE_SSH_PRIVATE_KEY }}
           # REQUIRED-02/03: Assign required host info.
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
           # REQUIRED-03/03: Assign required user info.
@@ -338,9 +325,9 @@ jobs:
         run: |
           # NOTE-WARN: Mixing 'global' & 'job' level env variables presents some wierd anamolies.
           echo "${{ env.REMOTE_GITHUB }}${{ env.REMOTE_DIR_STAGING }}"
-          echo "${{ env.JOB_REMOTE_TARGET }}${{ env.REMOTE_DC_YAML_FILE }}"
-          echo "${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE"
-          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE up -d"
+          echo "${{ env.JOB_REMOTE_TARGET }}${{ env.REMOTE_DC_YAML_FILE_PROD }}"
+          echo "${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD"
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -362,11 +349,11 @@ jobs:
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
         # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down"
         # OPTION-02: Default + Remove all associated images & volumes aswell.
-        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down -v --rmi all"
         # OPTION-03: Remove containers for services not defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down --remove-orphans"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - STAGING - DONE." 
@@ -390,11 +377,13 @@ jobs:
       #url: 'http://www.myapp.com'
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_PROD
-      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      JOB_REMOTE_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
+      # MODIFY-01/02: Modify parameter as necessary for all subsequent deployments.
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_PROD
+      # MODIFY-02/02: Modify parameter as necessary for all subsequent deployments.
+      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_PROD
 
     steps:
       - name: MESSAGE (Start)
@@ -414,7 +403,7 @@ jobs:
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          echo "$JOB_REMOTE_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           # Create SSH file 'config'
@@ -462,7 +451,7 @@ jobs:
         # Define 'step' level environment variables.
         env:
           # REQUIRED-01/03: Assign required SSH key info. 
-          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ env.JOB_REMOTE_SSH_PRIVATE_KEY }}
           # REQUIRED-02/03: Assign required host info.
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
           # REQUIRED-03/03: Assign required user info.
@@ -474,7 +463,7 @@ jobs:
       - name: SSH - Build & Run Docker containers.
         run: |
           # NOTE-WARN: Mixing 'global' & 'job' level env variables presents some wierd anamolies.
-          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE up -d"
+          ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD up -d"
 
       # Timed delayed for database to spin up.
       - name: Timed delay (DB spin up)
@@ -492,11 +481,11 @@ jobs:
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
         # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down"
         # OPTION-02: Default + Remove all associated images & volumes aswell.
-        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down -v --rmi all"
+        run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down -v --rmi all"
         # OPTION-03: Remove containers for services not defined in the Compose file.
-        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE down --remove-orphans"
+        #run: ssh $JOB_SSH_HOSTNAME "sudo docker-compose -f ${{ env.JOB_REMOTE_TARGET }}$REMOTE_DC_YAML_FILE_PROD down --remove-orphans"
 
       - name: MESSAGE (End)
         run: echo "Performing deployment - PRODUCTION - DONE."

@@ -118,13 +118,15 @@ jobs:
     timeout-minutes: 10
     # Define 'job' level environment variables.
     env:
-      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_DEV
-      JOB_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
       JOB_REMOTE_HOST: ${{ secrets.AWS_SERVER_LS_AAA_HOST_DNS }}
       JOB_REMOTE_USER: ${{ secrets.AWS_SERVER_LS_AAA_USERNAME }}
+      JOB_REMOTE_SSH_PRIVATE_KEY: ${{ secrets.AWS_SERVER_LS_AAA_SSH_KEY }}
+      # MODIFY-01/02: Modify parameter as necessary for all subsequent deployments.
       #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_TMP
       #JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_DEV
       JOB_REMOTE_TARGET: $REMOTE_GITHUB$REMOTE_DIR_STAGING
+      # MODIFY-02/02: Modify parameter as necessary for all subsequent deployments.
+      JOB_SSH_HOSTNAME: $GITHUB_ENVIRONMENT_DEV
 
     steps:
       - name: MESSAGE (Start)
@@ -144,7 +146,7 @@ jobs:
           mkdir -p ${{ env.SSH_DIR_PATH }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           echo "Create key file."
-          echo "$JOB_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
+          echo "$JOB_REMOTE_SSH_PRIVATE_KEY" > ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           chmod 600 ${{ env.SSH_DIR_PATH }}${{ env.GITHUB_SSH_FILENAME_KEY }}
           ls -lah ${{ env.SSH_DIR_PATH }}
           # Create SSH file 'config'
@@ -164,7 +166,7 @@ jobs:
 #          mkdir -p ~/.ssh/
 #          ls -lah ~/.ssh/
 #          echo "Create key file."
-#          echo "$JOB_SSH_PRIVATE_KEY" > ~/.ssh/key_staging
+#          echo "$JOB_REMOTE_SSH_PRIVATE_KEY" > ~/.ssh/key_staging
 #          chmod 600 ~/.ssh/key_staging
 #          ls -lah ~/.ssh/
 #          cat >>~/.ssh/config <<END
@@ -212,7 +214,7 @@ jobs:
         # Define 'step' level environment variables.
         env:
           # REQUIRED-01/03: Assign required SSH key info. 
-          SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ env.JOB_REMOTE_SSH_PRIVATE_KEY }}
           # REQUIRED-02/03: Assign required host info.
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
           # REQUIRED-03/03: Assign required user info.

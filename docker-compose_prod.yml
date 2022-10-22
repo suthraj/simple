@@ -1,0 +1,68 @@
+# PURPOSE: Production YAML file.
+# Containers are not assigned predefined names.
+## Avoids container removal conflicts.
+
+version: "3"
+#version: "3.7"
+
+   
+services:
+  db:
+    container_name: djdc_db_pgv13_aa
+    image: postgres:13.5-bullseye
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+#    healthcheck:
+      #* Running properly (aka "healthy") if exit 0 returned.
+#      test: "exit 0" 
+
+  web:
+    container_name: djdc_web_aa
+    build: .
+    command: python myproject/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./django:/project/django
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db
+
+  # SERVICE - Redis.
+  # Specify configuration related to the deployment and running of services.
+  # Configures if and how to restart containers when they exit.
+  # Configures resource constraints:
+  ## The redis service is constrained to use no more than 50M of memory 
+  ## and 0.50 (50% of a single core) of available processing time (CPU), and has 
+  ## 20M of memory and 0.25 CPU time reserved (as always available to it).
+  ## WARNING: If your services or containers attempt to use more memory than the system has available, 
+  ## you may experience an Out Of Memory Exception (OOME) and a container, or the Docker daemon, might be killed by the kernel OOM killer. 
+  redis:
+    image: redis:alpine
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+

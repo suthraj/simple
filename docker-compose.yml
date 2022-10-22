@@ -1,10 +1,14 @@
+# PURPOSE: Non-production YAML file.
+# Containers are not assigned predefined names.
+## Avoids container removal conflicts.
+
 version: "3"
 #version: "3.7"
 
    
 services:
   db:
-    container_name: djdc_db_pgv13_aa
+    #container_name: djdc_db_pgv13_aa
     image: postgres:13.5-bullseye
     volumes:
       - ./data/db:/var/lib/postgresql/data
@@ -17,7 +21,7 @@ services:
 #      test: "exit 0" 
 
   web:
-    container_name: djdc_web_aa
+    #container_name: djdc_web_aa
     build: .
     command: python myproject/manage.py runserver 0.0.0.0:8000
     volumes:
