@@ -97,7 +97,9 @@ jobs:
 
   # JOB-02.
   # PURPOSE: Deploy repo. to cloud server via specified GitHub environment.
-  # USE-CASE: Push source code updates.  
+  # USE-CASE: Push source code updates.
+  # IMPORTANT: If the GitHub environment has been conigured to require approval, then manual approval is required (ie. continouse delivery).
+  ## Otherwise (ie. approval is disabled) then auto deployment (ie. continouse deployment) will occur.
   DeployToServer:
     # WARNING: For some reason, can't seem to use environment variable to assign the name. 
     name: "Deploy using GitHub environemnt: 'development'"
@@ -209,13 +211,13 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         # Define 'step' level environment variables.
         env:
-          # REQUIRED: 01/03
+          # REQUIRED-01/03: Assign required SSH key info. 
           SSH_PRIVATE_KEY: ${{ env.JOB_SSH_PRIVATE_KEY }}
-          # REQUIRED: 02/03
+          # REQUIRED-02/03: Assign required host info.
           REMOTE_HOST: ${{ env.JOB_REMOTE_HOST }}
-          # REQUIRED: 03/03
+          # REQUIRED-03/03: Assign required user info.
           REMOTE_USER: ${{ env.JOB_REMOTE_USER }}
-          # OPTIONAL:
+          # OPTIONAL: Assign the remote path to perform sync on.
           TARGET: ${{ env.JOB_REMOTE_TARGET }} 
 
       # SSH - Build & Run the Docker container/services defined in the YAML file.
