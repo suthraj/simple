@@ -41,6 +41,7 @@ env:
   DOCKER_DC_YAML_FILEPATH: ./docker-compose.yml
   DOCKER_CONTAINER_DJ_NAME: djdc_web_aa
   DOCKER_CONTAINER_DB_NAME: djdc_db_pgv13_aa
+  DOCKER_DC_FILEPATH: /project/django/myproject
 
 jobs:
   # JOB-01.
@@ -218,9 +219,10 @@ jobs:
         # Define custom task variables.
         run: | 
           echo "TEST: Run Test Cases"
-          ssh $JOB_SSH_HOSTNAME 'sudo docker exec $DOCKER_CONTAINER_DJ_NAME pwd'
-          ssh $JOB_SSH_HOSTNAME 'sudo docker exec $DOCKER_CONTAINER_DJ_NAME ls -lah'
-          ssh $JOB_SSH_HOSTNAME 'sudo docker exec -w /project/django/myproject djdc_web_aa python manage.py test -v 2 myapp.tests'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} pwd'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} ls -lah'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec -w ${{ env.DOCKER_DC_FILEPATH }} ${{ env.DOCKER_CONTAINER_DJ_NAME }} python manage.py test -v 2 myapp.tests'
+          #ssh $JOB_SSH_HOSTNAME 'sudo docker exec -w /project/django/myproject ${{ env.DOCKER_CONTAINER_DJ_NAME }} python manage.py test -v 2 myapp.tests'
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
