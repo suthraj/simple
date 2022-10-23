@@ -1,3 +1,4 @@
+# FILE: docker-compose.yml
 # PURPOSE: Non-production YAML file.
 # Containers are not assigned predefined names.
 ## Avoids container removal conflicts.

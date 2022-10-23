@@ -1,3 +1,4 @@
+# FILE: docker-compose_prod.yml
 # PURPOSE: Production YAML file.
 # Containers are not assigned predefined names.
 ## Avoids container removal conflicts.
@@ -5,7 +6,6 @@
 version: "3"
 #version: "3.7"
 
-   
 services:
   db:
     container_name: djdc_db_pgv13_aa
