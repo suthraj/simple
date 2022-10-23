@@ -208,8 +208,8 @@ jobs:
       - name: PROJECT-DJ-APP-Simple (1/2) - Perform healthcheck.
         run: | 
           echo "CHECK-ENDPOINT: http://localhost:8000/home/"
-          ssh $JOB_SSH_HOSTNAME 'sudo docker exec $DOCKER_CONTAINER_DJ_NAME pwd'
-          ssh $JOB_SSH_HOSTNAME 'sudo docker exec $DOCKER_CONTAINER_DJ_NAME ls -lah'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} pwd'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} ls -lah'
           ssh $JOB_SSH_HOSTNAME 'sudo docker run --network container:${{ env.DOCKER_CONTAINER_DJ_NAME }} appropriate/curl --retry 10 --retry-connrefused http://localhost:8000/home/'
 
       # SSH - CONTAINER-Django: Test - Run test cases.
