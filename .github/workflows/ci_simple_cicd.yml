@@ -90,8 +90,8 @@ jobs:
 
 
   # JOB-02.
-  # PURPOSE: Deploy repo. to the following environment: development
-  # USE-CASE: Push source code updates.  
+  # PURPOSE: Deploy repo. to remote target and Build, Run, & Test containerized app (GitHub Action Environment: 'development')
+  # USE-CASE: Push source code updates, perform endpoint healthcheck and run app test cases.
   DeployToDev:
     name: Deploy to the 'development' environemnt.
     #if: github.event_name == 'pull_request'
@@ -238,8 +238,8 @@ jobs:
 
 
   # JOB-03.
-  # PURPOSE: Deploy repo. to cloud server via specified GitHub environment (ie. 'staging').
-  # USE-CASE: Push source code updates.
+  # PURPOSE: Deploy repo. to remote target and Build, Run, & Test containerized app (GitHub Action Environment: 'staging')
+  # USE-CASE: Push source code updates, perform endpoint healthcheck and run app test cases.
   # IMPORTANT: If the GitHub environment has been conigured to require approval, then manual approval is required (ie. continouse delivery).
   ## Otherwise (ie. approval is disabled) then auto deployment (ie. continouse deployment) to production envrionment will occur.
   DeployToStaging:
@@ -367,6 +367,20 @@ jobs:
           #echo "REMOTE: Show all existing containers"
           #ssh staging 'sudo docker ps -a'
 
+      # SSH - CONTAINER-Django: Perform healthcheck - Test Django default app endpoint.
+      - name: PROJECT-DJ-APP-Simple (1/2) - Perform healthcheck.
+        run: | 
+          echo "CHECK-ENDPOINT: http://localhost:8000/home/"
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} pwd'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} ls -lah'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker run --network container:${{ env.DOCKER_CONTAINER_DJ_NAME }} appropriate/curl --retry 10 --retry-connrefused http://localhost:8000/home/'
+
+      # SSH - CONTAINER-Django: Test - Run test cases.
+      - name: PROJECT-DJ-APP-Simple (2/2) - Run app test cases.
+        run: | 
+          echo "TEST: Run Test Cases"
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec -w ${{ env.DOCKER_DC_FILEPATH }} ${{ env.DOCKER_CONTAINER_DJ_NAME }} python manage.py test -v 2 myapp.tests'
+
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
         # OPTION-01: By default, the only things removed are containers for services & networks defined in the Compose file.
@@ -381,8 +395,8 @@ jobs:
 
 
   # JOB-04.
-  # PURPOSE: Deploy repo. to cloud server via specified GitHub environment.
-  # USE-CASE: Push source code updates.
+  # PURPOSE: Deploy repo. to remote target and Build, Run, & Test containerized app (GitHub Action Environment: 'production')
+  # USE-CASE: Push source code updates, perform endpoint healthcheck and run app test cases.
   # IMPORTANT: If the GitHub environment has been conigured to require approval, then manual approval is required (ie. continouse delivery).
   ## Otherwise (ie. approval is disabled) then auto deployment (ie. continouse deployment) to production envrionment will occur.
   DeployToProduction:
@@ -498,6 +512,20 @@ jobs:
         run: |
           echo "REMOTE: Show all existing containers"
           ssh $JOB_SSH_HOSTNAME 'sudo docker ps -a'
+
+      # SSH - CONTAINER-Django: Perform healthcheck - Test Django default app endpoint.
+      - name: PROJECT-DJ-APP-Simple (1/2) - Perform healthcheck.
+        run: | 
+          echo "CHECK-ENDPOINT: http://localhost:8000/home/"
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} pwd'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec ${{ env.DOCKER_CONTAINER_DJ_NAME }} ls -lah'
+          ssh $JOB_SSH_HOSTNAME 'sudo docker run --network container:${{ env.DOCKER_CONTAINER_DJ_NAME }} appropriate/curl --retry 10 --retry-connrefused http://localhost:8000/home/'
+
+      # SSH - CONTAINER-Django: Test - Run test cases.
+      - name: PROJECT-DJ-APP-Simple (2/2) - Run app test cases.
+        run: | 
+          echo "TEST: Run Test Cases"
+          ssh $JOB_SSH_HOSTNAME 'sudo docker exec -w ${{ env.DOCKER_DC_FILEPATH }} ${{ env.DOCKER_CONTAINER_DJ_NAME }} python manage.py test -v 2 myapp.tests'
 
       # SSH - Stop & remove the Docker container/services defined in the YAML file.
       - name: SSH - Cleanup - Stop & remove Docker containers.
